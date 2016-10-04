@@ -1,0 +1,203 @@
+setwd('C:/Users/L03052618/Documents/Clustering ML')
+Lid.Ad.data <- read.csv('EIC.Lid.Ad.csv')
+# 125 obs. de 17 vars.
+# Ándale güero
+
+library(cluster)
+library(fpc)
+
+# ¿Qué clase de variables tengo?
+for (column in c(1:17)){
+  print(class(Lid.Ad.data[,column]))
+}
+# mayormente integer
+# añadí punto decimal en excel. a ver si funcionó
+
+Lid.Ad.data <- read.csv('EIC.Lid.Ad.csv')
+for (column in c(3,12,13,16,17)){
+  print(class(Lid.Ad.data[,column]))
+}
+# sigo con integers. hmmm
+
+clusterset <- Lid.Ad.data[,c(3,12,13,16,17)]
+
+clus1 <- kmeans(clusterset, centers = 3)
+plotcluster(clusterset, clus1$cluster)
+
+clus2 <- kmeans(clusterset, centers = 4)
+plotcluster(clusterset, clus2$cluster)
+# parábola. quiere decir que hay un trade-off entre los dos factores
+
+wsumsq <- (nrow(clusterset)-1)*sum(apply(clusterset,2,var))
+for (i in 2:15) wsumsq[i] <- sum(kmeans(clusterset, centers = i)$withinss)
+plot(1:15, wsumsq, type = 'b', xlab = 'Número de Clústeres', ylab = 'Sum of Squares en grupo')
+# entre 2 y 3 grupos
+
+clus3 <- kmeans(clusterset, centers = 2)
+plotcluster(clusterset, clus3$cluster)
+
+# tomar media de clusteres
+aggregate(clusterset, by = list(clus3$cluster), FUN = mean)
+### ver resultados-----------------------
+Group.1       SNI PubsQ1.Q2.2011.2015 X.PubsQ1.Q2.2011.2015 CitasPerPub2011.2015
+1       1 0.8165138            4.568807              0.466055             2.320183
+2       2 2.0000000           28.375000              0.697500             4.181250
+SocialNetwork
+1      0.733945
+2      1.000000
+
+# anexar clasificación de cluster
+clusterset <- data.frame(clusterset,clus3$cluster)
+
+# plot
+plotcluster(clusterset, clus3$cluster)
+clusplot(clusterset, clus3$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+
+write.csv(clusterset, 'Lid.Ad.Resultados.csv', row.names = F, col.names = TRUE)
+
+# AHORA debo de normalizar los variables
+scaled.clusterset <- scale(clusterset[,c(1:4)])
+
+wsumsq <- (nrow(scaled.clusterset)-1)*sum(apply(scaled.clusterset,2,var))
+for (i in 2:15) wsumsq[i] <- sum(kmeans(scaled.clusterset, centers = i)$withinss)
+plot(1:15, wsumsq, type = 'b', xlab = 'Número de Clústeres', ylab = 'Sum of Squares en grupo')
+
+clus5 <- kmeans(scaled.clusterset, centers = 5)
+plotcluster(scaled.clusterset, clus5$cluster)
+
+# tomar media de clusteres
+aggregate(scaled.clusterset, by = list(clus5$cluster), FUN = mean)
+### ver resultados-----------------------
+Group.1        SNI PubsQ1.Q2.2011.2015 X.PubsQ1.Q2.2011.2015 CitasPerPub2011.2015
+1       1 -1.5187841          -0.6753769            -1.1751224          -0.53173125
+2       2  1.2326364           3.7439025             1.0297682           0.94121214
+3       3  0.1431850          -0.4463758            -0.8386809          -0.43873244
+4       4 -0.2576067          -0.1549095             0.9652392           0.62295844
+5       5  1.1094959           0.6440044             0.4564241          -0.07498033
+###-------------------
+  
+# anexar clasificación de cluster
+clusterset <- data.frame(clusterset,clus5$cluster)
+
+# plot
+plotcluster(scaled.clusterset, clus5$cluster)
+clusplot(scaled.clusterset, clus5$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+
+write.csv(clusterset, 'Lid.Ad.ScaledResultados.csv', row.names = F, col.names = TRUE)
+
+---------------------------------------------------------------------------------
+  
+# Se me olvidó Social Network
+  # Incluir social network
+
+scaled.clusterset2 <- scale(clusterset[,c(1:5)])
+
+wsumsq <- (nrow(scaled.clusterset2)-1)*sum(apply(scaled.clusterset2,2,var))
+for (i in 2:15) wsumsq[i] <- sum(kmeans(scaled.clusterset2, centers = i)$withinss)
+plot(1:15, wsumsq, type = 'b', xlab = 'Número de Clústeres', ylab = 'Sum of Squares en grupo')
+
+clus5.2 <- kmeans(scaled.clusterset2, centers = 5)
+plotcluster(scaled.clusterset2, clus5.2$cluster)
+
+# tomar media de clusteres
+aggregate(scaled.clusterset2, by = list(clus5.2$cluster), FUN = mean)
+### ver resultados-----------------------
+Group.1        SNI PubsQ1.Q2.2011.2015 X.PubsQ1.Q2.2011.2015 CitasPerPub2011.2015
+1       1 -0.4817622        -0.502911953            -0.8264939           -0.3967490
+2       2  0.1948913         0.008092872             0.7846511            0.1429387
+3       3 -0.5516181        -0.581244228            -0.6390229           -0.5496886
+4       4  1.2679487         1.926530678             0.4612089            0.3170063
+5       5  0.2821457        -0.135352816             1.0840688            4.0841921
+SocialNetwork
+1     0.5474182
+2     0.4925447
+3    -1.8121429
+4     0.5474182
+5    -1.8121429
+## Johns Hopkins here I come!!
+###-------------------
+
+# anexar clasificación de cluster
+clusterset <- data.frame(clusterset,clus5.2$cluster)
+
+# plot
+plotcluster(scaled.clusterset2, clus5.2$cluster)
+clusplot(scaled.clusterset2, clus5.2$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+
+write.csv(clusterset, 'Lid.Ad.ScaledResultados2.csv', row.names = F, col.names = TRUE)
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+#Con dos verdaderamente numeric variables
+  
+data2 <- clusterset[,c(2,4)]
+
+wsumsq <- (nrow(data2)-1)*sum(apply(data2,2,var))
+for (i in 2:15) wsumsq[i] <- sum(kmeans(data2, centers = i)$withinss)
+plot(1:15, wsumsq, type = 'b', xlab = 'Número de Clústeres', ylab = 'Sum of Squares en grupo')
+# Se ve como 3 o.... 4
+
+
+# explorar
+attach(data2)
+PubsQ1.Q2.2011.2015
+plot(PubsQ1.Q2.2011.2015, CitasPerPub2011.2015)
+# se ve tres clústeres. Pubs<10 y Citas/Pub<5. Citas/Pub>5 pero Pubs<10. Pubs>10 pero Citas/Pub~5
+summary(data2)
+
+data2$cluster <- 0
+assign.cluster <- function (data) {for (case in 1:nrow(data))
+  {  if (data2[case,PubsQ1.Q2.2011.2015] > 10){
+    data2[,cluster] == 1
+  }
+}}
+assign.cluster(data2)
+
+
+
+
+
+clus5.2 <- kmeans(scaled.clusterset2, centers = 5)
+plotcluster(scaled.clusterset2, clus5.2$cluster)
+
+# tomar media de clusteres
+aggregate(scaled.clusterset2, by = list(clus5.2$cluster), FUN = mean)
+### ver resultados-----------------------
+Group.1        SNI PubsQ1.Q2.2011.2015 X.PubsQ1.Q2.2011.2015 CitasPerPub2011.2015
+1       1 -0.4817622        -0.502911953            -0.8264939           -0.3967490
+2       2  0.1948913         0.008092872             0.7846511            0.1429387
+3       3 -0.5516181        -0.581244228            -0.6390229           -0.5496886
+4       4  1.2679487         1.926530678             0.4612089            0.3170063
+5       5  0.2821457        -0.135352816             1.0840688            4.0841921
+SocialNetwork
+1     0.5474182
+2     0.4925447
+3    -1.8121429
+4     0.5474182
+5    -1.8121429
+## Johns Hopkins here I come!!
+###-------------------
+
+# anexar clasificación de cluster
+clusterset <- data.frame(clusterset,clus5.2$cluster)
+
+# plot
+plotcluster(scaled.clusterset2, clus5.2$cluster)
+clusplot(scaled.clusterset2, clus5.2$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+
+write.csv(clusterset, 'Lid.Ad.ScaledResultados2.csv', row.names = F, col.names = TRUE)
+
+
+#¡!¡!¡!¡!¡ Bien primer paso. Fue una práctica. Aprendí refinir mis procesos.
+# Incluir nombres de profes en datos en R
+# hacer scatters, distributions y chequeos básicos
+# Vi más funciones, gráfos, STANDARDIZATION. MUY BIEN HECHO JAMES (HA-MESS)
+# ls() shows workspace
+# rm(list = ls()) would clear it
+
