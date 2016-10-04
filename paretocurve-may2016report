@@ -1,0 +1,158 @@
+# Open up wd, read file, ver datos
+setwd('C:/Users/L03052618/Documents/Clustering ML')
+EICcomplete <- read.csv('EIC.csv')
+head(EICcomplete)
+tail(EICcomplete)
+
+
+# Chequeos básicos. Scatter. Labels. Y-axis scale.
+  attach(EICcomplete)
+  plot(PubsQ1.Q2.2011.2015,CitasPerPub2011.2015, main = 'All EIC Nominas')
+  plot(PubsQ1.Q2.2011.2015,CitasPerPub2011.2015, main = 'All EIC Nominas', ylim = c(0,35))
+  text(PubsQ1.Q2.2011.2015,CitasPerPub2011.2015, 
+       labels = Nombre 
+       cex = 0.5, 
+       pos = 3)
+  
+  plot(PubsQ1.Q2.2011.2015,CitasPerPub2011.2015, main = 'All EIC Nominas', ylim = c(0,35))
+  text(PubsQ1.Q2.2011.2015,CitasPerPub2011.2015, 
+       labels = ifelse(CitasPerPub2011.2015>5, Nombre, NA), 
+       cex = 0.5, 
+       pos = 3)
+  
+  # Convertir factor en character, éxito. Ahora sí funiciona los labels.  
+    class(Nombre)
+    EICstrings <- read.csv('EIC.csv', stringsAsFactors = FALSE)
+    class(EICstrings$Nombre)
+  
+    EICcomplete$Nombre <- as.character(EICcomplete$Nombre)
+    class(EICcomplete$Nombre)
+  
+  plot(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015, main = 'All EIC Nominas', ylim = c(0,35))
+  text(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015, 
+   labels = ifelse(EICcomplete$CitasPerPub2011.2015>5, EICcomplete$Nombre, NA), 
+   cex = 0.5, 
+   pos = 3) 
+  
+  
+# Crear columnas filtras
+  EICcomplete$FilterCitas5 <- ifelse(EICcomplete$CitasPerPub2011.2015>5,EICcomplete$Nombre,NA) 
+  EICcomplete$FilterCitas8 <- ifelse(EICcomplete$CitasPerPub2011.2015>8,EICcomplete$Nombre,NA) 
+  EICcomplete$FilterCitas10 <- ifelse(EICcomplete$CitasPerPub2011.2015>10,EICcomplete$Nombre,NA) 
+  
+  
+# Overlapping label (etiquetas superposicionadoas problema). 2 solucciones
+  library(ggplot2)
+  library(ggrepel)
+  ggplot(EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015)) +
+    geom_point(aes(color = 'red')) +    
+    geom_text_repel(aes(label = ifelse(EICcomplete$CitasPerPub2011.2015>10,
+                                       EICcomplete$Nombre, NA))) 
+  ggplot(EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015)) +
+    geom_point(aes(color = 'red')) +    
+    geom_text_repel(aes(label = EICcomplete$FilterCitas10)) 
+  
+  
+# CITAS/PUB >= 10. Add Axis Labals. Etiquetas de ejes
+  ggplot(EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015)) +
+    geom_point(aes(color = 'red'), show.legend = FALSE) +    
+    geom_text_repel(aes(label = ifelse(EICcomplete$CitasPerPub2011.2015>=10,
+                                       EICcomplete$Nombre,NA)), force = 2)+
+    labs(title = 'Authors with 10 or more Cites/Pub, of all EIC Nóminas')+
+    xlab('Publications Q1 or Q2 2011-2015')+
+    ylab('Cites/Pub 2011-2015')
+  
+  # ¿Quienes son?
+  print(EICcomplete$FilterCitas10, na.print = "")
+  for (i in 1:nrow(EICcomplete)){
+    if (EICcomplete[i,"CitasPerPub2011.2015"]<10){
+      next
+    }
+    print(EICcomplete[i,2])
+  }
+  
+  
+# PUBS >= 20
+  ggplot(EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015))+
+    geom_point(aes(color = 'red'), show.legend = FALSE)+
+    geom_text_repel(aes(label = ifelse(EICcomplete$PubsQ1.Q2.2011.2015>=20,
+                                       EICcomplete$Nombre,NA)), force = 3)+
+    labs(title = 'Authors with 20 or more Q1&Q2 Publications, of all EIC Nóminas')+
+    xlab('Publications Q1 or Q2 2011-2015')+
+    ylab('Cites/Pub 2011-2015')
+  
+  # ¿Quienes son?
+  for (i in 1:nrow(EICcomplete)){
+    if (EICcomplete[i,"PubsQ1.Q2.2011.2015"]<20){
+      next
+    }
+    print(EICcomplete[i,"Nombre"])
+  }
+  
+# PUbs>= 10, Citas/Pub>= 5
+  ggplot(EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015))+
+    geom_point(aes(color = 'red'), show.legend = FALSE)+
+    geom_text_repel(aes(label = ifelse(EICcomplete$PubsQ1.Q2.2011.2015>=10 & EICcomplete$CitasPerPub2011.2015>=5,
+                                       EICcomplete$Nombre,NA)))+
+    labs(title = 'Authors with at least 5 Cites/Pub and at least 10 Q1&Q2 Publications, of all EIC Nóminas')+
+    xlab('Publications Q1 or Q2 2011-2015')+
+    ylab('Cites/Pub 2011-2015')
+  
+# Plain scatter
+  ggplot(EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015,EICcomplete$CitasPerPub2011.2015))+
+    geom_point(aes(color = 'red'), show.legend = FALSE)+
+    labs(title = 'Q1&Q2 Publications and Cites/Pub, of all EIC Nóminas')+
+    xlab('Publications Q1&Q2 2011-2015')+
+    ylab('Cites/Pub 2011-2015')
+  
+  # Resumenes básicos
+  summary(EICcomplete$PubsQ1.Q2.2011.2015)
+  summary(EICcomplete$CitasPerPub2011.2015)
+  summary(EICcomplete$PubsInQ1)
+  summary(EICcomplete$PubsInJournal)
+  plot(EICcomplete$PubsQ1.Q2.2011.2015)
+  hist(EICcomplete$PubsQ1.Q2.2011.2015)
+  ggplot(data = EICcomplete, aes(EICcomplete$PubsQ1.Q2.2011.2015))+
+    geom_histogram(fill = 'blue', breaks = seq(0, 70, by = 2))+
+    labs(title='Historgram of Q1&Q2 Publications 2011-2015')+
+    labs(x='Number of Q1&Q2 Publications', 
+         y='Number of Researchers with X Number of Q1&Q2 Publications')
+  
+#Concentration curve
+  curveConcent(x=EICcomplete[, "PubsQ1.Q2.2011.2015"], y=EICcomplete[,"CitasPerPub2011.2015"],
+               col="blue", 
+               xlab="Percentile of Publication Output",
+               ylab = 'Percentile of Citations Received')
+  curveConcent(x=EICcomplete[, "PubsInJournal"], y=EICcomplete[,"CitasPerPub2011.2015"],
+               col="red", 
+               add = TRUE)
+  curveConcent(x=EICcomplete[, "PubsInQ1"], y=EICcomplete[,"CitasPerPub2011.2015"],
+               col="green", 
+               add = TRUE)
+  
+  # ¿? Go get total pubs from otro archivo .csv ?¿
+    
+  title(main="Concentration of Citations to Most Published Authors,\nall EIC Nómina")
+  legend("topleft", legend = c("All Journal Publications", "Q1&Q2 Publications", "Q1 Publications"), col=c("red", "blue", "green"), lty=rep(1, 3))
+  
+# Puro concentración de pubs y citas  
+  curveConcent(x=EICcomplete[, "PubsQ1.Q2.2011.2015"], y=EICcomplete[,"PubsQ1.Q2.2011.2015"], 
+               col="brown", 
+               xlab="Percentile of the Population")
+  curveConcent(x=EICcomplete[, "CitasPerPub2011.2015"], y=EICcomplete[,"CitasPerPub2011.2015"], 
+               col="purple", 
+               add = TRUE)
+  title(main="Concentration of Citations and Publications,\nall EIC Nómina")
+  legend("topleft", legend = c("Percentile of Citations Received", "Percentile of Publications Published"), col=c("purple", "brown"), lty=rep(1, 2))
+  
+  TotalPubCite <- read.csv('Total Pubs and Cites.csv')
+  curveConcent(x=TotalPubCite[, "TotalPublications"], y=TotalPubCite[,"TotalPublications"], 
+               col="brown", 
+               xlab="Percentile of the Population")
+  curveConcent(x=TotalPubCite[, "TotalCitations"], y=TotalPubCite[,"TotalCitations"], 
+               col="purple", 
+               add = TRUE)
+  title(main="Concentration of Citations and Publications,\nall EIC Nómina")
+  legend("topleft", legend = c("Percentile of Total Articles Published", "Percentile of Citations Received"), col=c("brown", "purple"), lty=rep(1, 2))
+  
+  
